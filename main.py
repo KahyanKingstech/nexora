@@ -1,12 +1,16 @@
 import asyncio
-from fastapi import FastAPI, Request
+import os
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from department import router as department_router
-import create_table  # ✅ Calls table creation
-import os
+from employee import router as employee_router
+from models import Employee, Department
+import create_table
 
 app = FastAPI()
 
@@ -24,6 +28,7 @@ async def startup_event():
     await create_table.create_tables()  # ✅ Calls table creation before running API
 
 app.include_router(department_router)
+app.include_router(employee_router)
 
 # Ensure the "templates" folder exists for Jinja2
 TEMPLATE_DIR = "templates"
@@ -37,9 +42,6 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
 # Serve static files (for CSS, JS, images)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-# Include the department router
-app.include_router(department_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_homepage(request: Request):

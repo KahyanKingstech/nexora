@@ -3,160 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Db</title>
-    <script>
-        const apiUrl = "http://127.0.0.1:9000/api/departments";
-
-        async function fetchDepartments() {
-            try {
-                let response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                
-                let data = await response.json();
-                console.log("✅ Full API Response:", data); // Debugging
-                
-                if (!data.departments || !Array.isArray(data.departments)) {
-                    console.error("🚨 'departments' is missing or not an array:", data);
-                    return;
-                }
-
-                let departments = data.departments;
-                console.log("✅ Extracted Departments:", departments); 
-
-                let tableBody = document.getElementById("departmentsTable");
-                tableBody.innerHTML = "";  
-
-                departments.forEach(department => {
-                    console.log("🔍 Department Object:", department); // Debugging each department
-
-                    // Check if department_id and department_name exist
-                    if (!department.department_id || !department.department_name) {
-                        console.error("❌ Missing properties in department:", department);
-                        return;
-                    }
-
-                    let row = `<tr>
-                        <td>${department.department_id}</td>
-                        <td>${department.department_name}</td>
-                        <td>
-                            <button onclick="editDepartment('${department.department_id}', '${department.department_name}')">Edit</button>
-                            <button onclick="deleteDepartment('${department.department_id}')">Delete</button>
-                        </td>
-                    </tr>`;
-                    tableBody.insertAdjacentHTML("beforeend", row);
-                });
-            } catch (error) {
-                console.error("❌ Error fetching departments:", error);
-            }
+    <title>Nexora</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            margin: 10px 30px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         }
 
-
-
-        // Add a new department
-        async function addDepartment() {
-            let department = {
-                department_id: document.getElementById("department_id").value,
-                department_name: document.getElementById("department_name").value
-            };
-
-            try {
-                let response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(department)
-                });
-
-                if (!response.ok) {
-                    let errorData = await response.json();
-                    alert(errorData.detail || "Failed to add department");
-                    return;
-                }
-
-                alert("Department added successfully");
-                fetchDepartments();
-            } catch (error) {
-                console.error("Error adding department:", error);
-            }
+        .hidden {
+            display: none;
         }
 
-        // Edit department (pre-fills form)
-        function editDepartment(department_id, department_name) {
-            document.getElementById("department_id").value = department_id;
-            document.getElementById("department_name").value = department_name;
-            document.getElementById("updateButton").style.display = "inline";
+        .department_table, .employee_table {
+            border-collapse: collapse;
+            border: 1px solid black;
+            width: 100%;
         }
 
-        // Update department
-        async function updateDepartment() {
-            let department_id = document.getElementById("department_id").value;
-            let updatedDepartment = {
-                department_id: department_id,  // Include department_id in update
-                department_name: document.getElementById("department_name").value
-            };
-
-            try {
-                let response = await fetch(`${apiUrl}/${department_id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(updatedDepartment)
-                });
-
-                if (!response.ok) {
-                    let errorData = await response.json();
-                    alert(errorData.detail || "Failed to update department");
-                    return;
-                }
-
-                alert("Department updated successfully");
-                fetchDepartments();
-                document.getElementById("updateButton").style.display = "none";
-            } catch (error) {
-                console.error("Error updating department:", error);
-            }
+        .department_table th, .employee_table th {
+            background-color:rgb(170, 200, 227);
         }
 
-        // Delete department
-        async function deleteDepartment(department_id) {
-            if (!confirm("Are you sure you want to delete this department?")) return;
-
-            try {
-                let response = await fetch(`${apiUrl}/${department_id}`, { method: "DELETE" });
-
-                if (!response.ok) {
-                    let errorData = await response.json();
-                    alert(errorData.detail || "Failed to delete department");
-                    return;
-                }
-
-                alert("Department deleted successfully");
-                fetchDepartments();
-            } catch (error) {
-                console.error("Error deleting department:", error);
-            }
+        .department_table td, .employee_table td {
+            background-color:rgb(246, 251, 255);
         }
 
-        // Load departments on page load
-        window.onload = fetchDepartments;
-    </script>
+        .department_table th, .department_table td, .employee_table th, .employee_table td {
+            border: 1px solid black;
+            padding: 5px 10px;
+            text-align: left;
+        }
+
+        input[type="text"], select {
+            padding: 3px 10px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+
+        #addDepartmentButton, #updateDepartmentButton, #editDepartmentButton, #deleteDepartmentButton, #addEmployeeButton, #updateEmployeeButton, #editEmployeeButton, #deleteEmployeeButton {
+            border: none;
+            padding: 5px 15px;
+            color: white;
+            border-radius: 2px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+
+        #addDepartmentButton, #addEmployeeButton {
+            background-color: green;
+        }
+
+        #updateDepartmentButton, #editDepartmentButton, #updateEmployeeButton, #editEmployeeButton{
+            background-color: rgb(39, 116, 147);
+        }
+
+        #deleteDepartmentButton, #deleteEmployeeButton {
+            background-color: rgb(201, 70, 70);
+        }
+
+    </style>
+    <script src="/static/show_section.js"></script>
+    <script src="/static/department.js"></script>
+    <script src="/static/employee.js"></script>
 </head>
 <body>
-    <h2>Test Db</h2>
 
-    <input type="text" id="department_id" placeholder="Department ID" required>
-    <input type="text" id="department_name" placeholder="Department Name" required>
-    <button onclick="addDepartment()">Add</button>
-    <button id="updateButton" onclick="updateDepartment()" style="display:none;">Update</button>
-    
-    <br><br>
-    <table border="1" style="width:100%;">
-        <thead>
-            <tr>
-                <th>Department ID</th>
-                <th>Department Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="departmentsTable"></tbody>
-    </table>
+    <h1>NEXORA</h1>
+    <label for="managementType">Select Management Section:</label>
+    <select id="managementType" onchange="showSection(this.value)">
+        <option value="home">Home</option>
+        <option value="departments">Manage Departments</option>
+        <option value="employees">Manage Employees</option>
+    </select>
+
+    <!-- Home Section -->
+    <div id="homeSection">
+        <h2>Welcome to the Nexora</h2>
+        <p>Select a section from the dropdown menu to manage your data.</p>
+    </div>
+
+    <!-- Department Management Section (Initially Hidden) -->
+    <div id="departmentSection" class="hidden">
+        <h2>Manage Departments</h2>
+
+        <input type="text" id="department_id" placeholder="Department ID" required>
+        <input type="text" id="department_name" placeholder="Department Name" required>
+        
+        <button id="addDepartmentButton" onclick="addDepartment()"><i class="fas fa-plus"></i>  Add</button>
+        <button id="updateDepartmentButton" onclick="updateDepartment()" style="display:none;"><i class="fas fa-sync-alt"></i>  Update</button>
+
+        <br><br>
+        <table class="department_table">
+            <thead>
+                <tr>
+                    <th>Department ID</th>
+                    <th>Department Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="departmentsTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Employee Management Section -->
+    <div id="employeeSection" class="hidden">
+        <h2>Manage Employees</h2>
+
+        <input type="text" id="employee_id" placeholder="Employee ID" required>
+        <input type="text" id="employee_name" placeholder="Employee Name" required>
+        <select id="gender" required>
+            <option value="">Select Gender</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+        </select>
+        <input type="text" id="email" placeholder="Email" required>
+        <input type="text" id="phone" placeholder="Phone" required>
+        <select id="employee_department_id" required>
+            <option value="">Select Department</option>
+        </select>
+
+        <button id="addEmployeeButton" onclick="addEmployee()"><i class="fas fa-plus"></i>  Add</button>
+        <button id="updateEmployeeButton" onclick="updateEmployee()" style="display:none;"><i class="fas fa-sync-alt"></i>  Update</button>
+
+        <br><br>
+        <table class="employee_table">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Gender</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employeesTable"></tbody>
+        </table>
+    </div>
+
 </body>
 </html>
