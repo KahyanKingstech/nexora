@@ -1,4 +1,4 @@
-const employeeApiUrl = "http://127.0.0.1:9000/api/employees";
+const employeeApiUrl = "https://nexora-15s3.onrender.com/api/employees";
 
 async function fetchEmployees() {
     try {
