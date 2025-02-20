@@ -1,4 +1,4 @@
-const departmentApiUrl = "https://nexora-15s3.onrender.com/api/departments";
+const departmentApiUrl = "http://127.0.0.1:9000/api/departments";
 
 async function fetchDepartments() {
     try {
