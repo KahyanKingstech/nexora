@@ -3,3 +3,4 @@ uvicorn
 aiomysql
 cryptography 
 jinja2
+sqlalchemy
